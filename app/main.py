@@ -5,7 +5,7 @@ from typing import Iterable, List, Optional, Sequence
 from fastapi import Body, FastAPI, HTTPException, Path, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, conlist, root_validator, validator
 
 app = FastAPI(title="In-memory TODO API")
 
@@ -81,9 +81,11 @@ class ErrorResponse(BaseModel):
 
 
 class BulkUpdatePayload(BaseModel):
-    ids: List[int] = Field(..., min_items=1)
-    done: Optional[bool] = None
-    title_prefix: Optional[str] = None
+    ids: conlist(int, min_items=1) = Field(..., example=[1, 2, 3])
+    done: Optional[bool] = Field(None, example=True)
+    title_prefix: Optional[str] = Field(
+        None, example="[Updated] "
+    )
 
     @root_validator
     def validate_operation(cls, values: dict) -> dict:
@@ -93,7 +95,7 @@ class BulkUpdatePayload(BaseModel):
 
 
 class BulkDeletePayload(BaseModel):
-    ids: List[int] = Field(..., min_items=1)
+    ids: conlist(int, min_items=1) = Field(..., example=[1, 2])
 
 
 class MetricsResponse(BaseModel):
